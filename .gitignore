@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.model
+*.pth
+*.pt
+*.ckpt
+*.onnx
+*.safetensors
+*.h5
+*.hdf5
+*.tflite
+*.pb
