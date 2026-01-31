@@ -42,7 +42,7 @@ python -m scsc.run_stage1
 Stage 2（Color 训练，默认不确定性版配置）：
 
 ```bash
-python -m scsc.run_stage2_train --opt "stage2_color/options/train/train_ddcolor_uncertainty.yml"
+python -m scsc.run_stage2_train --opt "stage2_color/options/train/train_color_uncertainty.yml"
 ```
 
 Stage 2（不确定性测试/报告，已改为“相对不确定性”分档口径，避免固定阈值导致偏高观感）：
