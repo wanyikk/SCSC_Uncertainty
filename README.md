@@ -1,55 +1,54 @@
 # SCSC_Uncertainty
 
-本项目将两个阶段整合为一个端到端流水线：
+This project integrates two stages into an end-to-end pipeline:
 
-1. **语义通信重构（Stage 1 / Semantic）**：输入彩色图像 → 转灰度（3 通道复制）→ Swin-Transformer 编码 → 无线信道仿真（AWGN / Rayleigh）→ Swin-Transformer 解码 → 得到重构灰度图。
-2. **颜色恢复（Stage 2 / Color + Uncertainty）**：输入重构灰度图 → 颜色解码器 + 像素解码器 → 输出彩色图像，并给出不确定性（偶然/认知/总不确定性）。
+1. **Semantic Communication Reconstruction (Stage 1 / Semantic)**: Input color image → Convert to grayscale (3-channel replication) → Swin-Transformer Encoding → Wireless Channel Simulation (AWGN / Rayleigh) → Swin-Transformer Decoding → Reconstructed grayscale image.
+2. **Color Restoration (Stage 2 / Color + Uncertainty)**: Input reconstructed grayscale image → Color Decoder + Pixel Decoder → Output color image, and provide uncertainty (Aleatoric/Epistemic/Total Uncertainty).
 
-目录结构：
-- `stage1_semantic/`：Stage 1（语义通信模块）。
-- `stage2_color/`：Stage 2（颜色恢复模块）。
-- `scsc/`：端到端集成代码与统一入口脚本。
+Directory Structure:
+- `stage1_semantic/`: Stage 1 (Semantic Communication Module).
+- `stage2_color/`: Stage 2 (Color Restoration Module).
+- `scsc/`: End-to-end integration code and unified entry scripts.
 
-## 端到端推理
+## End-to-End Inference
 
-在 `SCSC_Uncertainty` 目录下运行：
+Run in the `SCSC_Uncertainty` directory:
 
 ```bash
 python -m scsc.run_inference ^
-  --input "Y:\path\to\images_or_image.png" ^
-  --output_dir "Y:\path\to\out" ^
-  --stage1_ckpt "Y:\teacherguo\Semantic Communications\WITT-main_02\SCSC_Uncertainty\stage1_semantic\Semantic_AWGN_DIV2K_random_snr_psnr_C96.model" ^
-  --stage2_ckpt "Y:\path\to\ddcolor_uncertainty.pth" ^
+  --input "\path\to\images_or_image.png" ^
+  --output_dir "\path\to\out" ^
+  --stage1_ckpt "SCSC_Uncertainty\stage1_semantic\Semantic_AWGN_DIV2K_random_snr_psnr_C96.model" ^
+  --stage2_ckpt "\path\to\color_uncertainty.pth" ^
   --snr 10 ^
   --channel_type awgn ^
   --save_uncertainty
 ```
 
-说明：
-- `--input` 支持单张图片或文件夹。
-- `--snr` 为指定信噪比（dB）。如果不指定，将按 Stage 1 的 `multiple_snr` 随机采样。
-- `--save_uncertainty` 会额外输出不确定性可视化与报告：同时保存“原始不确定性”与“相对不确定性（分位归一化）”，避免阈值固定导致“总是高不确定性”的观感偏差。
+Notes:
+- `--input` supports single image or folder.
+- `--snr` specifies the Signal-to-Noise Ratio (dB). If not specified, it will sample randomly according to `multiple_snr` in Stage 1.
+- `--save_uncertainty` will additionally output uncertainty visualization and reports: saving both "Raw Uncertainty" and "Relative Uncertainty (Quantile Normalization)" to avoid the perception bias of "always high uncertainty" caused by fixed thresholds.
 
-## 单阶段训练/测试入口
+## Single Stage Training/Testing Entry Points
 
-Stage 1（Semantic）：
+Stage 1 (Semantic):
 
 ```bash
 python -m scsc.run_stage1 --training
 python -m scsc.run_stage1
 ```
 
-Stage 2（Color 训练，默认不确定性版配置）：
+Stage 2 (Color Training, default uncertainty configuration):
 
 ```bash
 python -m scsc.run_stage2_train --opt "stage2_color/options/train/train_color_uncertainty.yml"
 ```
 
-Stage 2（不确定性测试/报告，已改为“相对不确定性”分档口径，避免固定阈值导致偏高观感）：
+Stage 2 (Uncertainty Testing/Reporting, changed to "Relative Uncertainty" quantile scale to avoid high perception bias from fixed thresholds):
 
 ```bash
 python -m scsc.run_stage2_test_uncertainty ^
-  --input "Y:\\path\\to\\test_images" ^
-  --output "Y:\\path\\to\\out_uncert"
+  --input "\\path\\to\\test_images" ^
+  --output "\\path\\to\\out_uncert"
 ```
-
